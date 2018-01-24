@@ -4,17 +4,24 @@
     <% include ../partials/_header %>
 </head>
 <body>
-  <table>
+    <% for (let key in urls) { %>
+    <form method="POST" action="/urls/<%= key %>/delete"><%= key %> -> <a href="<%= urls[key] %>"><%= urls[key] %></a><button type="submit">delete</button></form>
+    <%} %>
+  
+</body>
+</html>
+
+<!-- 
+<table style="width:50%">
     <tr>
       <th>URL</th>
       <th>Shortened URL</th>
     </tr>
-    <% for (let key in urls) { %>
-      <tr>
-        <td><%= urls[key] %></td>
-        <td><%= key %></td>
-      </tr>
-    <%} %>
-  </table>
-</body>
-</html>
+    
+    <tr>
+      <td>
+        
+      </td> 
+    </tr>
+    
+  </table> -->

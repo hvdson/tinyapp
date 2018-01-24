@@ -17,15 +17,12 @@ function generateRandomString() {
 }
 
 app.get("/", (req, res) => {
-  res.end("Hello!");
+  let templateVars = { urls: urlDatabase };
+  res.render("pages/urls_index", templateVars);
 });
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
-});
-
-app.get("hello", (req, res) => {
-  res.end("<html>></html>\n");
 });
 
 app.get("/urls", (req, res) => {
@@ -51,10 +48,15 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);
   let tinyURL = generateRandomString();
   urlDatabase[tinyURL] = req.body.longURL;
   res.redirect(`http://localhost:8080/urls/${tinyURL}`);
+  // res.send();
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id];
+  res.redirect(`/urls`);
   // res.send();
 });
 
