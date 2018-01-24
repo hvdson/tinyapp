@@ -26,11 +26,6 @@ app.get("/urls", (req, res) => {
   res.render("pages/urls_index", templateVars);
 });
 
-app.get("/urls/:id", (req, res) => {
-  let templateVars = { shortURL: req.params.id };
-  res.render("pages/urls_show", templateVars);
-});
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
