@@ -5,23 +5,13 @@
 </head>
 <body>
     <% for (let key in urls) { %>
-    <form method="POST" action="/urls/<%= key %>/delete"><%= key %> -> <a href="<%= urls[key] %>"><%= urls[key] %></a><button type="submit">delete</button></form>
+    <form method="POST" action="/urls/<%= key %>/delete">
+      <%= key %> -> <a href="<%= urls[key] %>"> <%= urls[key] %></a><a href="/urls/<%= key %>"> edit</a>
+      <button type="submit">delete</button>
+    </form>
     <%} %>
-  
+    <form method="GET" action="urls/new">
+      <button>create new tinyURL</button> 
+    </form>
 </body>
 </html>
-
-<!-- 
-<table style="width:50%">
-    <tr>
-      <th>URL</th>
-      <th>Shortened URL</th>
-    </tr>
-    
-    <tr>
-      <td>
-        
-      </td> 
-    </tr>
-    
-  </table> -->

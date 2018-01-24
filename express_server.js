@@ -21,19 +21,19 @@ app.get("/", (req, res) => {
   res.render("pages/urls_index", templateVars);
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
 
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render("pages/urls_index", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
-});
+// app.get("/u/:shortURL", (req, res) => {
+//   let longURL = urlDatabase[req.params.shortURL];
+//   res.redirect(longURL);
+// });
 
 app.get("/urls/new", (req, res) => {
   res.render("pages/urls_new");
@@ -54,12 +54,32 @@ app.post("/urls", (req, res) => {
   // res.send();
 });
 
+app.post("/urls/:id", (req, res) => {
+
+  if (req.body.shortURL.length > 0) {
+    urlDatabase[req.params.id] = req.body.shortURL;
+  }
+
+  console.log(req.body.shortURL);
+  res.redirect(`/urls`);
+  // res.send();
+});
+
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect(`/urls`);
   // res.send();
 });
 
+
+
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+// font-family
+// setminwidth on labels and forms
+// whitespace is nice
+// round corners for buttons
+// background colour

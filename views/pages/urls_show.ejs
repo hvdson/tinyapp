@@ -4,6 +4,14 @@
   <% include ../partials/_header %>
 </head>
 <body>
-    <p>Long URL = <%= longURL[shortURL] %></p>
+    <h2>ShortURL: <%= shortURL %></h2>
+    <form method="POST" action="/urls/<%= shortURL %>">
+      <input type="text" name="shortURL" placeholder="<%= longURL[shortURL] %>"><button>update</button>
+    </form>
+
+     <form method="GET" action="/urls">
+      <button>Back to URLs</button>
+    </form>
+
 </body>
 </html>
