@@ -47,6 +47,13 @@ app.get("/urls/:id", (req, res) => {
   res.render("pages/urls_show", templateVars);
 });
 
+
+app.post("/login", (req, res) => {
+  console.log(req.body.username);
+  res.redirect(`/urls`);
+  // res.send();
+});
+
 app.post("/urls", (req, res) => {
   let tinyURL = generateRandomString();
   urlDatabase[tinyURL] = req.body.longURL;
@@ -70,7 +77,6 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect(`/urls`);
   // res.send();
 });
-
 
 
 
