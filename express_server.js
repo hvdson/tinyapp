@@ -33,6 +33,11 @@ app.get("/urls", (req, res) => {
   res.render("pages/urls_index", templateVars);
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  let longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
 app.get("/urls/new", (req, res) => {
   res.render("pages/urls_new");
 });
