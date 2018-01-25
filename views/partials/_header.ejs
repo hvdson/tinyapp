@@ -1,16 +1,24 @@
 <!-- views/partials/_header.ejs -->
-<p>_header.ejs</p>
+<h4>Welcome to TinyURL</h4>
 <% if (user) { %>
-  <h2><%= user.email %></h2>
+  <h3><%= user.email %></h3>
   <form method="POST" action="/logout">
     <button>logout</button>
   </form>
 
 <% } else { %>
-<form method="POST" action="/login">
-  <input id="login" type="text" name="email" placeholder="email" style="width: 500px">
-  <button>login</button>
+<form method="GET" action="/login">
+  <button>Login Here</button>
 </form>
+
+<form method="GET" action="/register">
+  <button>Register</button>
+</form>
+
+<form method="GET" action="/">
+  <button>Home</button>
+</form>
+
 <%} %>
 
 
