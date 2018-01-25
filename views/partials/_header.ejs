@@ -1,10 +1,17 @@
 <!-- views/partials/_header.ejs -->
 <p>_header.ejs</p>
+<% if (username) { %>
+  <h2><%= username %></h2>
+  <form method="POST" action="/logout">
+    <button>logout</button>
+  </form>
+
+<% } else { %>
 <form method="POST" action="/login">
   <input id="login" type="text" name="username" placeholder="username" style="width: 500px">
   <button>login</button>
-
 </form>
+<%} %>
 
 
 <hr></hr>

@@ -1,11 +1,13 @@
 var express = require("express");
 var app = express();
+var cookieParser = require("cookie-parser");
 var PORT = process.env.PORT || 8080;
 
 app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -17,7 +19,12 @@ function generateRandomString() {
 }
 
 app.get("/", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  console.log("username: ", req);
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
+  // res.render("pages/urls_index", templateVars);
   res.render("pages/urls_index", templateVars);
 });
 
@@ -26,7 +33,10 @@ app.get("/", (req, res) => {
 // });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render("pages/urls_index", templateVars);
 });
 
@@ -36,20 +46,29 @@ app.get("/urls", (req, res) => {
 // });
 
 app.get("/urls/new", (req, res) => {
-  res.render("pages/urls_new");
+  let templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render("pages/urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
-    longURL: urlDatabase
+    longURL: urlDatabase,
+    username: req.cookies["username"]
   };
   res.render("pages/urls_show", templateVars);
 });
 
 
 app.post("/login", (req, res) => {
-  console.log(req.body.username);
+  res.cookie("username", req.body.username);
+  // QUESTION asky why below prints undefined in console
+  // console.log(res.cookie.username);
+  let templateVars = {
+    username: req.cookies["username"]
+  };
   res.redirect(`/urls`);
   // res.send();
 });
@@ -66,10 +85,8 @@ app.post("/urls/:id", (req, res) => {
   if (req.body.shortURL.length > 0) {
     urlDatabase[req.params.id] = req.body.shortURL;
   }
-
-  console.log(req.body.shortURL);
+  // console.log(req.body.shortURL);
   res.redirect(`/urls`);
-  // res.send();
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -78,6 +95,11 @@ app.post("/urls/:id/delete", (req, res) => {
   // res.send();
 });
 
+app.post("/logout", (req, res) => {
+  res.clearCookie("username", req.cookies["username"]);
+  res.redirect(`/urls`);
+  // res.send();
+});
 
 
 app.listen(PORT, () => {
