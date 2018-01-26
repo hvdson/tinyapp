@@ -118,6 +118,9 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  if (!res.locals.user) {
+    res.redirect("/login");
+  }
   res.render("pages/urls_new");
 });
 
