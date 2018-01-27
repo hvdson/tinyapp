@@ -285,3 +285,5 @@ app.listen(PORT, () => {
 // whitespace is nice
 // round corners for buttons
 // background colour
+
+// <a href="/urls/<%= obj %>"> edit</a>

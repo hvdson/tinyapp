@@ -1,5 +1,20 @@
 <!-- views/partials/_header.ejs -->
-<h4>Welcome to TinyURL</h4>
+
+<title>TinyURL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<body class="w3-theme-l5">
+<div style="min-width:400px">
+
+<div class="w3-bar w3-large w3-theme-d5">
+    <span class="w3-bar-item">TinyURL</span>
+</div>
+
+</div>
+
+<div class="w3-bar-block w3-bar-item">
 <% if (user) { %>
   <h3><%= user.email %></h3>
   <form method="POST" action="/logout">
@@ -18,8 +33,6 @@
 <form method="GET" action="/">
   <button>Home</button>
 </form>
-
+</div>
 <%} %>
-
-
-<hr></hr>
+</div>

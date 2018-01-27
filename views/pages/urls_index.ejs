@@ -3,21 +3,39 @@
 <head>
     <% include ../partials/_header %>
 </head>
-<body>
-    <% for (let obj in urls) { %>
-    <form method="POST" action="/urls/<%= obj %>/delete">
-      <%= obj %> -> <a href="<%= urls[obj].url %>"> <%= urls[obj].url %></a>
-      <% if (user) { %>
-        <% if (urls[obj].userId === user.id) {%>   
-          <a href="/urls/<%= obj %>"> edit</a>
-          <button type="submit">delete</button>
-        <%} %>
-      <%} %>
-    </form>
-    <%} %>
 
-    <form method="GET" action="urls/new">
-      <button>create new tinyURL</button> 
-    </form>
+<title>TinyURL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<body class="w3-theme-d1">
+<div style="min-width:400px">
+  <% for (let obj in urls) { %>
+
+  <div class="w3-panel w3-white w3-card w3-display-container">
+  <form method="GET" action="/urls/<%= obj %>">
+    <p class="w3-text-green"><b><%= obj %></b></p>
+    <a class="w3-text-blue" href="<%= urls[obj].url %>"><%= urls[obj].url %></a>
+    <% if (user) { %>
+    <% if (urls[obj].userId === user.id) {%>      
+    <button>edit</button>
+  </form>
+  <form method="POST" action="/urls/<%= obj %>/delete">
+  <button class="w3-text-red" type="submit">delete</button>
+  </form>  
+  <%} %>
+  <%} %>
+  </div>
+  <%} %>
+</div>
+
+<div class="w3-container w3-panel w3-card">
+<form method="GET" action="urls/new">
+  <button class="w3-container w3-panel w3-card" style="width:100%">create new tinyURL</button> 
+</form>
+</div> 
 </body>
+
 </html>
