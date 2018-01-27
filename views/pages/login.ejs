@@ -5,16 +5,22 @@
   <% include ../partials/_header %>
 </head>
 
-<body style="font-size:20px; padding:50px;">
+<div class="w3-container w3-display-container w3-medium">
+<body style="margin:auto;">
+  
+  <h1><center>Login</center></h1>
   <form action="/login" method="POST" style="margin:150px;">
+    <center>
     <label><b>Email</b></label><br>
-    <input id="login" type="text" name="email" placeholder="email" style="width: 500px"><br>
+    <input id="login" type="text" name="email" placeholder="email" style="width: 300px"><br>
     <label><b>Password</b></label><br>
     <input name="password" type="password" style="width: 300px"><br>
     <label><b>Confirm Password</b></label><br>
     <input name="confirmPassword" type="password" placeholder="Confirm Password" style="width: 300px"><br>
-    <button>login</button>
-  </form>  
-</body>
+    <button class="w3-btn w3-hover-light-blue w3-border">login</button>
+  </center>
+  </form> 
 
+</body>
+</div>
 </html>

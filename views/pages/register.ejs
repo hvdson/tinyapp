@@ -5,7 +5,10 @@
   <% include ../partials/_header %>
 </head>
 
-<body style="font-size:20px; padding:50px;">
+<div class="w3-container w3-display-container w3-medium">
+<body style="margin:auto;">
+  <h1><center>Register</center></h1>
+  <center>
   <form action="/register" method="POST" style="margin:150px;">
     <label><b>Email</b></label><br>
     <input name="email" type="email" placeholder="example@domain.com" style="width: 300px"><br>
@@ -13,8 +16,9 @@
     <input name="password" type="password" style="width: 300px"><br>
     <label><b>Confirm Password</b></label><br>
     <input name="confirmPassword" type="password" placeholder="Confirm Password" style="width: 300px"><br>
-    <button>Submit</button>
+    <button class="w3-btn w3-hover w3-border">Submit</button>
   </form>  
+</center>
 </body>
 
 </html>
