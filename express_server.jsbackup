@@ -12,9 +12,35 @@ app.use(cookieParser());
 
 // getting database info
 const database = require("./database.js");
-const { urlDatabase, users, urlsForUser } = database;
+const { urlDatabase, users } = database;
 
 const bcrypt = require("bcrypt");
+
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
+// const users = {
+//   "userRandomID": {
+//     id: "userRandomID",
+//     email: "user@example.com",
+//     password: "purple-monkey-dinosaur"
+//   },
+  
+//   "user2RandomID": {
+//     id: "user2RandomID",
+//     email: "user2@example.com",
+//     password: "dishwasher-funk"
+//   },
+  
+//   "test": {
+//     id: "test",
+//     email: "test@test.com",
+//     password: "test"
+//   }
+// };
+
 
 function registerFieldsEmpty(emailAddress, password, confirmPassword) {
   return (emailAddress === "" || password === "" || confirmPassword === "");
@@ -35,18 +61,6 @@ function databaseHasUserEmail(email) {
   for (let user in users) {
     if (user.email === email) {
       return user;
-    }
-  }
-  return false;
-}
-
-function shortUrlInCurrDatabase(urls, shortUrl) {
-  for (let obj in urls) {
-
-    console.log(obj, shortUrl);
-    
-    if (obj === shortUrl) {
-      return true;
     }
   }
   return false;
@@ -80,10 +94,8 @@ function getUserByEmail(email) {
 app.use(function(req, res, next) {
   // everytime server receives a request first pass through middleware
   res.locals.user = users[req.cookies.user_id];
-
-  // console.log(req.cookies.user_id);
-  // console.dir(res.locals, { colors: true });
-
+  console.log(req.cookies.user_id);
+  console.dir(res.locals, { colors: true });
   // POST that handles register && login will set the cookie
   // on first access of page w.o cookie will print { user: undefined }
   next();
@@ -94,21 +106,26 @@ app.use(function(req, res, next) {
 // should only res(pond) with readable data - NOT changing anything
 // ---------------------------------------------
 
-
 app.get("/", (req, res) => {
-  const urls = urlsForUser(req.cookies.user_id);
-  // You already have the user id
-  // you have a function urlsForUser userId => urls
+  // QUESTION: does req.cookies["user_id"] exist at the beginning
+
+  // for (let userId in urlDatabase) {
+  //   console.log(`shortURL ${userId}`);
+  //   console.log(`longURL ${userId.url}`);
+  // }
+
   let templateVars = {
-    urls: urls
+    urls: urlDatabase
   };
+  // express only looks for FILES the views directory
   res.render("pages/urls_index", templateVars);
 });
 
 app.get("/urls", (req, res) => {
-  const urls = urlsForUser(req.cookies.user_id);
+
+  // need helper function to get all urls
   let templateVars = {
-    urls: urls
+    urls: urlDatabase
   };
   res.render("pages/urls_index", templateVars);
 });
@@ -139,30 +156,16 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  // only the current user should be able to
-  // access their own url based on req.params.id
+  const shortURL = req.params.id;
 
-  // this is shortened database obj
-  const urls = urlsForUser(req.cookies.user_id);
+  let templateVars = {
+    shortURL: shortURL,
+    longURL: urlDatabase[shortURL].url
+  };
 
-  console.log(urls);
-  console.log(req.params.id);
+  console.log("longURL: ", urlDatabase[shortURL].url);
 
-  // console.log(shortUrlInCurrDatabase(urls, req.params.id));
-  // helper fntn to check if short url exists
-  if (shortUrlInCurrDatabase(urls, req.params.id)) {
-    const shortURL = req.params.id;
-    let templateVars = {
-      shortURL: shortURL,
-      longURL: urls[shortURL].url
-    };
-    res.render("pages/urls_show", templateVars);
-  } else {
-    res.redirect("/urls");
-  }
-
-  // console.log("longURL: ", urlDatabase[shortURL].url);
-  
+  res.render("pages/urls_show", templateVars);
 });
 
 app.get("/login", (req, res) => {
@@ -184,6 +187,8 @@ app.post("/urls", (req, res) => {
     userId: req.cookies.user_id
   };
 
+  console.log("in post(/urls", urlDatabase[shortURL]);
+  console.log("in post(/urls", req.body.longURL);
   res.redirect(`/urls/${shortURL}`);
   // res.send();
 });
@@ -192,7 +197,9 @@ app.post("/urls/:id", (req, res) => {
   if (req.body.shortURL.length > 0) {
     urlDatabase[req.params.id].url = req.body.shortURL;
   }
-
+  console.log("req.params.id: ", req.params.id);
+  console.log("req.body.shortURL: ", req.body.shortURL);
+  
   res.redirect(`/urls`);
 });
 
@@ -217,13 +224,8 @@ app.post("/login", (req, res) => {
   // if the user exists from email lookup
   if (user) {
     // check if the password (and confirmPass) match database
+    if (obj.password === user.password && obj.confirmPassword === user.password) {
 
-    const hashedPass = bcrypt.compareSync(obj.password, user.password);
-    const hashedConfirmPass = bcrypt.compareSync(obj.confirmPassword, user.password);
-
-    // should return true if they match
-    if (hashedPass && hashedConfirmPass) {
-      console.log(user.password);
       // work normally
       res.cookie("user_id", user.id);
       res.locals.user = user;
@@ -270,6 +272,8 @@ app.post("/register", (req, res) => {
     email: email,
     password: hashedPassword
   };
+
+  // console.log(users[id].password);
   
   res.cookie("user_id", id);
   res.redirect(`/urls`);

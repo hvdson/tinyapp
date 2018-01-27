@@ -4,10 +4,15 @@
     <% include ../partials/_header %>
 </head>
 <body>
-    <% for (let key in urls) { %>
-    <form method="POST" action="/urls/<%= key %>/delete">
-      <%= key %> -> <a href="<%= urls[key] %>"> <%= urls[key] %></a><a href="/urls/<%= key %>"> edit</a>
-      <button type="submit">delete</button>
+    <% for (let obj in urls) { %>
+    <form method="POST" action="/urls/<%= obj %>/delete">
+      <%= obj %> -> <a href="<%= urls[obj].url %>"> <%= urls[obj].url %></a>
+      <% if (user) { %>
+        <% if (urls[obj].userId === user.id) {%>   
+          <a href="/urls/<%= obj %>"> edit</a>
+          <button type="submit">delete</button>
+        <%} %>
+      <%} %>
     </form>
     <%} %>
 
