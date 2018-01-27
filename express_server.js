@@ -1,21 +1,30 @@
+// --------------------------------------------------
+// NODE PACKAGES
 const express = require("express");
 const app = express();
-const cookieParser = require("cookie-parser");
-const PORT = process.env.PORT || 8080;
+const cookieSession = require("cookie-session");
+const bcrypt = require("bcrypt");
+// --------------------------------------------------
 
+const PORT = process.env.PORT || 8080;
 
 app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+
+app.use(cookieSession({
+  name: 'session',
+  keys: [process.env.SECRET_KEY || 'development']
+}));
 
 // getting database info
 const database = require("./database.js");
 const { urlDatabase, users, urlsForUser } = database;
 
-const bcrypt = require("bcrypt");
-
+// --------------------------------------------------
+// HELPER FUNCTIONS
+// --------------------------------------------------
 function registerFieldsEmpty(emailAddress, password, confirmPassword) {
   return (emailAddress === "" || password === "" || confirmPassword === "");
 }
@@ -61,17 +70,9 @@ function getUserByEmail(email) {
   }
   return false;
 }
-
-
-// function getUrlFromUser(userFromDB) {
-//   const urls = {};
-//   for (let shortUrl in userFromDB) {
-//     urls.shortUrl = userFromDB.shorturl;
-//   return false;
-// }
-
+// --------------------------------------------------
 // MIDDLEWARE
-// ---------------------------------------------
+// --------------------------------------------------
 // allows cookies to be stored in locals
 // don't need templateVars for cookies now b/c user cookies are
 // stored in the local obj of res(ponse)
@@ -79,24 +80,19 @@ function getUserByEmail(email) {
 
 app.use(function(req, res, next) {
   // everytime server receives a request first pass through middleware
-  res.locals.user = users[req.cookies.user_id];
-
-  // console.log(req.cookies.user_id);
-  // console.dir(res.locals, { colors: true });
+  res.locals.user = users[req.session.userId];
 
   // POST that handles register && login will set the cookie
   // on first access of page w.o cookie will print { user: undefined }
   next();
 });
 
-
+// --------------------------------------------------
 // GET requests:
 // should only res(pond) with readable data - NOT changing anything
-// ---------------------------------------------
-
-
+// --------------------------------------------------
 app.get("/", (req, res) => {
-  const urls = urlsForUser(req.cookies.user_id);
+  const urls = urlsForUser(req.session.userId);
   // You already have the user id
   // you have a function urlsForUser userId => urls
   let templateVars = {
@@ -106,7 +102,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const urls = urlsForUser(req.cookies.user_id);
+  const urls = urlsForUser(req.session.userId);
   let templateVars = {
     urls: urls
   };
@@ -114,16 +110,23 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
+  const urls = urlsForUser(req.session.userId);
 
-  const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL].url;
+  if (shortUrlInCurrDatabase(urls, req.params.id)) {
 
-  res.redirect(longURL);
+    const shortURL = req.params.id;
+    const longURL = urls[shortURL].url;
+
+    res.redirect(longURL);
+  } else {
+    res.redirect("/400");
+  }
+  
 });
 
 // app.get("/register", (req, res) => {
 //   res.render("pages/register", {
-//     user: users[req.cookies.user_id]
+//     user: users[req.session.userId]
 //   });
 // });
 
@@ -132,10 +135,10 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  if (!res.locals.user) {
-    res.redirect("/login");
+  if (res.locals.user) {
+    res.render("pages/urls_new");
   }
-  res.render("pages/urls_new");
+  res.redirect("/login");
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -143,10 +146,7 @@ app.get("/urls/:id", (req, res) => {
   // access their own url based on req.params.id
 
   // this is shortened database obj
-  const urls = urlsForUser(req.cookies.user_id);
-
-  console.log(urls);
-  console.log(req.params.id);
+  const urls = urlsForUser(req.session.userId);
 
   // console.log(shortUrlInCurrDatabase(urls, req.params.id));
   // helper fntn to check if short url exists
@@ -160,13 +160,14 @@ app.get("/urls/:id", (req, res) => {
   } else {
     res.redirect("/urls");
   }
-
-  // console.log("longURL: ", urlDatabase[shortURL].url);
   
 });
 
 app.get("/login", (req, res) => {
-  res.render("pages/login");
+  if (!res.locals.user) {
+    res.render("pages/login");
+  }
+  res.redirect("/login");
 });
 
 
@@ -174,14 +175,15 @@ app.get("/400", (req, res) => {
   res.render("pages/400");
 });
 
+// --------------------------------------------------
 // POST requests
-// ---------------------------------------------
+// --------------------------------------------------
 
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     url: req.body.longURL,
-    userId: req.cookies.user_id
+    userId: req.session.userId
   };
 
   res.redirect(`/urls/${shortURL}`);
@@ -208,7 +210,7 @@ app.post("/login", (req, res) => {
   // request.body needs to set NAME as a key
 
   // ----------------------------------------------
-  // DOES THIS WORK???
+  //  unnecessary but i like how it looks :)
   const obj = { email, password, confirmPassword } = req.body;
   // ----------------------------------------------
 
@@ -225,7 +227,7 @@ app.post("/login", (req, res) => {
     if (hashedPass && hashedConfirmPass) {
       console.log(user.password);
       // work normally
-      res.cookie("user_id", user.id);
+      req.session.userId = user.id;
       res.locals.user = user;
       res.redirect("/urls");
       // password field not correct - redirect
@@ -241,7 +243,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session.userId = null;
   // res.local.user = {};
   res.redirect(`/urls`);
   // res.send();
@@ -253,14 +255,13 @@ app.post("/register", (req, res) => {
   const { email, password, confirmPassword } = req.body;
 
   if (registerFieldsEmpty(email, password, confirmPassword)) {
-    res.status(409).redirect("/register");
+    res.status(400).redirect("/400");
   } else if (confirmPassword !== password) {
     console.log("Password confirmation does not match!");
-    res.status(409).redirect("/register");
+    res.status(400).redirect("/400");
   } else if (getUserByEmail(email)) {
     console.log("User already exists!");
-    // https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
-    res.status(409).redirect("/register");
+    res.status(400).redirect("/400");
   }
 
   const hashedPassword = bcrypt.hashSync(password, 10);
@@ -271,7 +272,7 @@ app.post("/register", (req, res) => {
     password: hashedPassword
   };
   
-  res.cookie("user_id", id);
+  req.session.userId = id;
   res.redirect(`/urls`);
 });
 
