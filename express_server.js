@@ -51,9 +51,6 @@ function databaseHasUserEmail(email) {
 
 function shortUrlInCurrDatabase(urls, shortUrl) {
   for (let obj in urls) {
-
-    console.log(obj, shortUrl);
-    
     if (obj === shortUrl) {
       return true;
     }
@@ -70,6 +67,32 @@ function getUserByEmail(email) {
   }
   return false;
 }
+
+// Checks if the url follows standard convention
+// returns type: false or string
+// false: if the url isn't valid
+// String: either same string or corrected to add protocol
+function checkCorrectUrl(url) {
+  const regexUrl = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
+  const regexHttp = new RegExp("^(http|https)://", "i");
+  // .test() returns a boolean if found in url
+  const matchUrl = regexUrl.test(url);
+  const matchHttp = regexHttp.test(url);
+  // check if valid url
+  if (matchUrl) {
+    // check if protocol exists
+    if (matchHttp) {
+      // return as is
+      return url;
+    } else {
+      // add protocol to url
+      return `https://${url}`;
+    }
+  }
+  // invalid url
+  return false;
+}
+
 // --------------------------------------------------
 // MIDDLEWARE
 // --------------------------------------------------
@@ -78,10 +101,9 @@ function getUserByEmail(email) {
 // stored in the local obj of res(ponse)
 // express.ejs handles this
 
-app.use(function(req, res, next) {
+app.use( (req, res, next) => {
   // everytime server receives a request first pass through middleware
   res.locals.user = users[req.session.userId];
-
   // POST that handles register && login will set the cookie
   // on first access of page w.o cookie will print { user: undefined }
   next();
@@ -91,17 +113,15 @@ app.use(function(req, res, next) {
 // GET requests:
 // should only res(pond) with readable data - NOT changing anything
 // --------------------------------------------------
+
+// assuming page displaying links is also homepage
 app.get("/", (req, res) => {
-  const urls = urlsForUser(req.session.userId);
-  // You already have the user id
-  // you have a function urlsForUser userId => urls
-  let templateVars = {
-    urls: urls
-  };
-  res.render("pages/urls_index", templateVars);
+  res.redirect("/urls");
 });
 
+// handles displaying links only to corresponding user
 app.get("/urls", (req, res) => {
+  // will not show any links for a person w/o cookie
   const urls = urlsForUser(req.session.userId);
   let templateVars = {
     urls: urls
@@ -119,16 +139,21 @@ app.get("/u/:id", (req, res) => {
 
     res.redirect(longURL);
   } else {
-    res.redirect("/400");
+    req.session.error = "Link does not exist.";
+    res.redirect("/error/404");
   }
   
 });
 
-// app.get("/register", (req, res) => {
-//   res.render("pages/register", {
-//     user: users[req.session.userId]
-//   });
-// });
+// ERROR HANDLING
+// redirects user to an error page showing http cat
+app.get("/error/:id", (req, res) => {
+  let templateVars = {
+    errorMsg: req.session.error,
+    httpCat: req.params.id
+  };
+  res.render("pages/error", templateVars);
+});
 
 app.get("/register", (req, res) => {
   res.render("pages/register");
@@ -138,17 +163,15 @@ app.get("/urls/new", (req, res) => {
   if (res.locals.user) {
     res.render("pages/urls_new");
   }
-  res.redirect("/login");
+  // add an error msg to the cookie
+  req.session.error = "Please login first.";
+  res.redirect("/error/401");
 });
 
 app.get("/urls/:id", (req, res) => {
   // only the current user should be able to
   // access their own url based on req.params.id
-
-  // this is shortened database obj
   const urls = urlsForUser(req.session.userId);
-
-  // console.log(shortUrlInCurrDatabase(urls, req.params.id));
   // helper fntn to check if short url exists
   if (shortUrlInCurrDatabase(urls, req.params.id)) {
     const shortURL = req.params.id;
@@ -160,42 +183,63 @@ app.get("/urls/:id", (req, res) => {
   } else {
     res.redirect("/urls");
   }
-  
 });
 
 app.get("/login", (req, res) => {
   if (!res.locals.user) {
     res.render("pages/login");
   }
-  res.redirect("/login");
+  // had it redirect to /login before and was caught in redirect loop
+  // happens when user is logged in but tries to access /login from address bar
+  res.redirect("/");
 });
 
-
-app.get("/400", (req, res) => {
-  res.render("pages/400");
+// handles incorrect requests from address bar
+app.get("*", (req, res) => {
+  req.session.error = "Page does not exist :(";
+  res.redirect("/error/404");
 });
+
+// app.get("/400", (req, res) => {
+//   res.render("pages/400");
+// });
 
 // --------------------------------------------------
 // POST requests
 // --------------------------------------------------
 
 app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString();
-  urlDatabase[shortURL] = {
-    url: req.body.longURL,
-    userId: req.session.userId
-  };
+  // helper fntn to check if http/https exists in the field
+  // TODO: implement helper fntn
+  const newUrl = checkCorrectUrl(req.body.longURL);
 
-  res.redirect(`/urls/${shortURL}`);
-  // res.send();
+  // ------
+  if (!newUrl) {
+    req.session.error = "Please enter a valid url";
+    res.redirect("/error/400");
+  } else {
+  // ------
+  // asssume that the url has http:// attatched
+    let shortURL = generateRandomString();
+    urlDatabase[shortURL] = {
+      url: newUrl,
+      userId: req.session.userId
+    };
+    res.redirect(`/urls/${shortURL}`);
+  }
 });
 
+// handles changing link for a given shortUrl
 app.post("/urls/:id", (req, res) => {
-  if (req.body.shortURL.length > 0) {
-    urlDatabase[req.params.id].url = req.body.shortURL;
+  // need to check if the updated url is valid
+  const newUrl = checkCorrectUrl(req.body.shortURL);
+  if (!newUrl) {
+    req.session.error = "Please enter a valid url";
+    res.redirect("/error/400");
+  } else {
+    urlDatabase[req.params.id].url = newUrl;
+    res.redirect(`/urls`);
   }
-
-  res.redirect(`/urls`);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -205,65 +249,67 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  
   // get the email, password & conf. from user input using deconstruction
   // request.body needs to set NAME as a key
-
   // ----------------------------------------------
   //  unnecessary but i like how it looks :)
   const obj = { email, password, confirmPassword } = req.body;
   // ----------------------------------------------
 
-  // returns user if email is in database - false otherwise
-  const user = getUserByEmail(email);
-  // if the user exists from email lookup
-  if (user) {
-    // check if the password (and confirmPass) match database
+  // first check if the fields are filled in
+  if (!registerFieldsEmpty(email, password, confirmPassword)) {
+    // returns user if email is in database - false otherwise
+    const user = getUserByEmail(email);
+    // if the user exists from email lookup
+    if (user) {
+      // check if the password (and confirmPass) match database
 
-    const hashedPass = bcrypt.compareSync(obj.password, user.password);
-    const hashedConfirmPass = bcrypt.compareSync(obj.confirmPassword, user.password);
+      const hashedPass = bcrypt.compareSync(obj.password, user.password);
+      const hashedConfirmPass = bcrypt.compareSync(obj.confirmPassword, user.password);
+      
+      // check if fields are empty
 
-    // should return true if they match
-    if (hashedPass && hashedConfirmPass) {
-      console.log(user.password);
-      // work normally
-      req.session.userId = user.id;
-      res.locals.user = user;
-      res.redirect("/urls");
-      // password field not correct - redirect
+      // should return true if they match
+      if (hashedPass && hashedConfirmPass) {
+        // work normally
+        req.session.userId = user.id;
+        res.locals.user = user;
+        res.redirect("/urls");
+      } else {
+        // password field not correct - redirect
+        req.session.error = "Please enter your info correctly to login.";
+        res.redirect("/error/400");
+      }
     } else {
-      console.log("Passwords don't match.");
-      res.status(403).redirect('/login');
+      req.session.error = "Please enter your info correctly to login.";
+      res.redirect("/error/400");
     }
   } else {
-    console.log("User doesn't exist");
-    // alert("User not found - try again ");
-    res.status(404).redirect('/login');
+    req.session.error = "Please enter your info correctly to login.";
+    res.redirect("/error/400");
   }
 });
 
 app.post("/logout", (req, res) => {
+  // clear the cookie
   req.session.userId = null;
-  // res.local.user = {};
   res.redirect(`/urls`);
-  // res.send();
 });
 
 app.post("/register", (req, res) => {
-
   const id = generateRandomString();
   const { email, password, confirmPassword } = req.body;
 
   if (registerFieldsEmpty(email, password, confirmPassword)) {
-    res.status(400).redirect("/400");
+    req.session.error = "Please enter all info.";
+    res.redirect("/error/400");
   } else if (confirmPassword !== password) {
-    console.log("Password confirmation does not match!");
-    res.status(400).redirect("/400");
+    req.session.error = "Passwords don't match!";
+    res.redirect("/error/400");
   } else if (getUserByEmail(email)) {
-    console.log("User already exists!");
-    res.status(400).redirect("/400");
+    req.session.error = "User already exists!";
+    res.redirect("/error/400");
   }
-
   const hashedPassword = bcrypt.hashSync(password, 10);
 
   users[id] = {
@@ -279,11 +325,3 @@ app.post("/register", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-// font-family
-// setminwidth on labels and forms
-// whitespace is nice
-// round corners for buttons
-// background colour
-
-// <a href="/urls/<%= obj %>"> edit</a>

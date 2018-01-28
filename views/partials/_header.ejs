@@ -8,34 +8,33 @@
 <body class="w3-theme-l5">
 <div style="min-width:400px">
 
-<div class="w3-bar w3-large w3-theme-d1">
-    <span class="w3-bar-item">TinyURL</span>
+<div class="w3-bar w3-large w3-light-grey">
+  <span class="w3-bar-item w3-text-deep-purple"><b>TinyURL</b></span>
+  <form method="GET" action="/" style="display:inline-block;">
+    <button class="w3-btn w3-hover-green w3-text-green w3-card">Home</button>
+  </form>
+
+<!-- <div class="w3-border w3-bar-block w3-bar-item w3-display-container"> -->
+
+  <% if (!user) { %>
+
+  <form method="GET" action="/login" style="display:inline-block;">
+    <button class="w3-btn w3-hover-amber w3-text-amber w3-card">Login Here</button>
+  </form>
+
+  <form method="GET" action="/register" style="display:inline-block;">
+    <button class="w3-btn w3-hover-amber w3-border-amber w3-text-amber w3-card">Register</button>
+  </form>
+
+  <% } else { %>
+  <form method="POST" action="/logout" style="display:inline-block;">
+    <button class="w3-btn w3-hover-red w3-text-red w3-card">logout</button>
+  </form>
 </div>
 
-</div>
-
-<div class="w3-border w3-bar-block w3-bar-item w3-display-container">
-<% if (user) { %>
-<h4><%= user.email %></h4>
-<form method="POST" action="/logout">
-  <button class="w3-btn w3-hover-red w3-border">logout</button>
-</form>
-
-
-<% } else { %>
-<div class="w3-display-container">
-<form method="GET" action="/login" style="display:inline-block;">
-  <button class="w3-btn w3-border">Login Here</button>
-</form>
-
-<form method="GET" action="/register" style="display:inline-block;">
-  <button class="w3-btn w3-border">Register</button>
-</form>
-
-<form method="GET" action="/" style="display:inline-block;">
-  <button class="w3-btn w3-border">Home</button>
-</form>
-</div>
-</div>
+<div class="w3-container w3-display-container w3-light-grey">
+  <h4><b><%= user.email %></b></h4>
+  </div>  
 <%} %>
+
 </div>

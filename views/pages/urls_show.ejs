@@ -4,15 +4,16 @@
   <% include ../partials/_header %>
 </head>
 <body>
+  <center>
     <h2 class="w3-xlarge">ShortURL: <b class="w3-text-green" style="display:inline-block;"><%= shortURL %></b></h2>
     <form method="POST" action="/urls/<%= shortURL %>">
-      <input type="text" name="shortURL" placeholder="<%= longURL %>" style="width: 500px">
+      <input type="text" name="shortURL" placeholder="<%= longURL %>" style="width: 50%">
       <button class="w3-btn w3-hover-green w3-border" style="display:inline-block;">update</button>
     </form>
 
      <form method="GET" action="/urls">
       <button class="w3-btn w3-hover w3-border">Back to URLs</button>
     </form>
-
+  </center>
 </body>
 </html>

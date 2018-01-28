@@ -9,10 +9,10 @@
 <div style="min-width:400px">
   <% for (let obj in urls) { %>
 
-  <div class="w3-panel w3-white w3-card w3-display-container">
+  <div class="w3-panel w3-light-grey w3-card w3-display-container">
   <form method="GET" action="/urls/<%= obj %>" style="display:inline-block;">
     <p class="w3-text-green"><b><%= obj %></b></p>
-    <a class="w3-text-blue" href="<%= urls[obj].url %>"><%= urls[obj].url %></a>
+    <a class="w3-text-blue w3-hover-text-green" href="<%= urls[obj].url %>"><%= urls[obj].url %></a>
     <% if (user) { %>
     <% if (urls[obj].userId === user.id) {%>      
     <button class="w3-btn w3-border">edit</button>
@@ -26,9 +26,11 @@
   <%} %>
 </div>
 
-<div class="w3-container">
+<div class="w3-container w3-section">
 <form method="GET" action="urls/new">
-  <button class="w3-btn w3-container w3-panel w3-card w3-hover-green" style="width:100%">create new tinyURL</button> 
+  <center>
+  <button class="w3-btn w3-container w3-panel w3-card w3-hover-green" style="width:50%; height:50%">create new tinyURL</button> 
+  </center>
 </form>
 </div> 
 </body>
