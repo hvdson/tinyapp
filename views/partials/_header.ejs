@@ -1,21 +1,22 @@
 <!-- views/partials/_header.ejs -->
-
 <title>TinyURL</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- styling resources -->
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <body class="w3-theme-l5">
 <div style="min-width:400px">
 
+<!-- For the header bar at the top --> 
 <div class="w3-bar w3-large w3-border w3-light-grey">
   <span class="w3-bar-item w3-text-deep-purple"><b>TinyURL</b></span>
   <form method="GET" action="/" style="display:inline-block;">
     <button class="w3-btn w3-hover-green w3-text-green w3-card">Home</button>
   </form>
 
-<!-- <div class="w3-border w3-bar-block w3-bar-item w3-display-container"> -->
-
+  <!-- If user isn't logged in - display login and register on header bar --> 
   <% if (!user) { %>
 
   <form method="GET" action="/login" style="display:inline-block;">
@@ -26,12 +27,14 @@
     <button class="w3-btn w3-hover-amber w3-border-amber w3-text-amber w3-card">Register</button>
   </form>
 
+  <!-- Display a logout button and the user's email address at the top --> 
   <% } else { %>
   <form method="POST" action="/logout" style="display:inline-block;">
     <button class="w3-btn w3-hover-red w3-text-red w3-card">logout</button>
   </form>
 </div>
 
+<!-- Home button is always shown for easy access around website --> 
 <div class="w3-container w3-display-container w3-light-grey">
   <h4>Welcome back: <span class="w3-text-deep-purple"><b><%= user.email %></b></span></h4>
   </div>  

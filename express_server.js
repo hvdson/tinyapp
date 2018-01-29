@@ -195,8 +195,8 @@ app.get("/login", (req, res) => {
     };
     res.render("pages/login", templateVars);
   } else {
-  // had it redirect to /login before and was caught in redirect loop
-  // happens when user is logged in but tries to access /login from address bar
+    // had it redirect to /login before and was caught in redirect loop
+    // happens when user is logged in but tries to access /login from address bar
     res.redirect("/");
   }
 });
@@ -207,12 +207,9 @@ app.get("*", (req, res) => {
   res.redirect("/error/404");
 });
 
-// app.get("/400", (req, res) => {
-//   res.render("pages/400");
-// });
-
 // --------------------------------------------------
 // POST requests
+// This should change data and redirect
 // --------------------------------------------------
 
 app.post("/urls", (req, res) => {

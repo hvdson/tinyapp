@@ -4,6 +4,7 @@
   <% include ../partials/_header %>
 </head>
 <body>
+  <!-- Display a specific tinyURL  -->
   <center>
     <h2 class="w3-xlarge">ShortURL: <b class="w3-text-green" style="display:inline-block;"><%= shortURL %></b></h2>
     <form method="POST" action="/urls/<%= shortURL %>">
