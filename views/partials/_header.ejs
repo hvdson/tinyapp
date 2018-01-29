@@ -8,7 +8,7 @@
 <body class="w3-theme-l5">
 <div style="min-width:400px">
 
-<div class="w3-bar w3-large w3-light-grey">
+<div class="w3-bar w3-large w3-border w3-light-grey">
   <span class="w3-bar-item w3-text-deep-purple"><b>TinyURL</b></span>
   <form method="GET" action="/" style="display:inline-block;">
     <button class="w3-btn w3-hover-green w3-text-green w3-card">Home</button>
@@ -33,7 +33,7 @@
 </div>
 
 <div class="w3-container w3-display-container w3-light-grey">
-  <h4><b><%= user.email %></b></h4>
+  <h4>Welcome back: <span class="w3-text-deep-purple"><b><%= user.email %></b></span></h4>
   </div>  
 <%} %>
 

@@ -162,10 +162,12 @@ app.get("/register", (req, res) => {
 app.get("/urls/new", (req, res) => {
   if (res.locals.user) {
     res.render("pages/urls_new");
+  } else {
+    // add an error msg to the cookie
+    // req.session.error = "Please login first.";
+    // res.redirect("/error/401");
+    res.redirect("/login");
   }
-  // add an error msg to the cookie
-  req.session.error = "Please login first.";
-  res.redirect("/error/401");
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -187,11 +189,16 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/login", (req, res) => {
   if (!res.locals.user) {
-    res.render("pages/login");
-  }
+    req.session.error = "Please login or register to create a TinyURL!.";
+    let templateVars = {
+      errorMsg: req.session.error
+    };
+    res.render("pages/login", templateVars);
+  } else {
   // had it redirect to /login before and was caught in redirect loop
   // happens when user is logged in but tries to access /login from address bar
-  res.redirect("/");
+    res.redirect("/");
+  }
 });
 
 // handles incorrect requests from address bar
@@ -292,7 +299,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   // clear the cookie
-  req.session.userId = null;
+  req.session = null;
   res.redirect(`/urls`);
 });
 
@@ -309,17 +316,18 @@ app.post("/register", (req, res) => {
   } else if (getUserByEmail(email)) {
     req.session.error = "User already exists!";
     res.redirect("/error/400");
-  }
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  } else {
+    const hashedPassword = bcrypt.hashSync(password, 10);
 
-  users[id] = {
-    id: id,
-    email: email,
-    password: hashedPassword
-  };
-  
-  req.session.userId = id;
-  res.redirect(`/urls`);
+    users[id] = {
+      id: id,
+      email: email,
+      password: hashedPassword
+    };
+    
+    req.session.userId = id;
+    res.redirect(`/urls`);
+  }
 });
 
 app.listen(PORT, () => {

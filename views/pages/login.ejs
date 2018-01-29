@@ -8,7 +8,7 @@
 <div class="w3-container w3-display-container w3-medium">
 <body style="margin:auto;">
   
-  <h1><center>Login</center></h1>
+  <h1 class="w3-text-deep-purple"><center>Login</center></h1>
   <form class="w3-margin" action="/login" method="POST">
     <center>
     <label><b>Email</b></label><br>
@@ -18,6 +18,7 @@
     <label><b>Confirm Password</b></label><br>
     <input name="confirmPassword" type="password" placeholder="Confirm Password" style="width: 300px"><br>
     <button class="w3-btn w3-card w3-hover-green w3-section">login</button>
+    <h4 class="w3-text-amber"><%= errorMsg %></h4>
   </center>
   </form> 
 
